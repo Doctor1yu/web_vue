@@ -56,7 +56,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getFeedbacks, deleteFeedback } from '@/api/data' // 假设接口封装在data.js中
+import { getFeedbacks, deleteFeedback, updateFeedbackStatus } from '@/api/data' // 假设接口封装在data.js中
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(true)
@@ -100,8 +100,31 @@ const statusText = (status) => {
 
 // 修改状态
 const handleUpdateStatus = (row) => {
-  console.log('修改状态:', row)
-  // 这里可以调用修改状态的接口
+  ElMessageBox.prompt('请输入状态 (1:未处理, 2:处理中, 3:已处理)', '修改状态', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPattern: /^[1-3]$/,
+    inputErrorMessage: '请输入 1（未处理）、2（处理中）或 3（已处理）'
+  })
+    .then(async ({ value }) => {
+      const newStatus = Number(value)
+      try {
+        const res = await updateFeedbackStatus(row.id, newStatus)
+        if (res.code === 0) {
+          ElMessage.success('状态修改成功')
+          // 更新表格中的状态
+          row.status = newStatus
+        } else {
+          ElMessage.error(res.message || '状态修改失败')
+        }
+      } catch (error) {
+        console.error('状态修改失败:', error)
+        ElMessage.error('状态修改失败')
+      }
+    })
+    .catch(() => {
+      ElMessage.info('修改状态已取消')
+    })
 }
 
 // 删除操作
