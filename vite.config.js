@@ -17,10 +17,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {//获取路径中包含了/api的请求
+      '/apiAdmin': {//获取路径中包含了/api的请求
         target: 'http://localhost:8899',//后台服务所在的源
         changeOrigin: true,//修改源
-        rewrite: (path) => path.replace(/^\/api/, '')///api替换为''
+        rewrite: (path) => path.replace(/^\/apiAdmin/, '')///api替换为''
       }
     }
   }

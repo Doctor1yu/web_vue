@@ -56,8 +56,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getFeedbacks } from '@/api/data' // 假设接口封装在data.js中
-import { ElMessage } from 'element-plus'
+import { getFeedbacks, deleteFeedback } from '@/api/data' // 假设接口封装在data.js中
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(true)
 const tableData = ref([])
@@ -106,8 +106,25 @@ const handleUpdateStatus = (row) => {
 
 // 删除操作
 const handleDelete = (row) => {
-  console.log('删除反馈:', row)
-  // 这里可以调用删除接口
+  ElMessageBox.confirm('确定删除该反馈吗？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      deleteFeedback(row.id)
+        .then(() => {
+          ElMessage.success('删除成功');
+          fetchFeedbacks(); // 删除成功后重新获取反馈数据
+        })
+        .catch(error => {
+          console.error('删除失败:', error);
+          ElMessage.error('删除失败');
+        });
+    })
+    .catch(() => {
+      ElMessage.info('删除已取消');
+    });
 }
 
 // 筛选后的数据

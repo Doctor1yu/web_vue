@@ -1,8 +1,7 @@
 import axios from 'axios';
-
 import {ElMessage} from 'element-plus'
 
-const baseURL = '/api';
+const baseURL = '/apiAdmin';
 const instance = axios.create({baseURL})
 
 import {useTokenStore} from '@/stores/token.js'

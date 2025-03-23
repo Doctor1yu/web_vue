@@ -18,7 +18,7 @@ const router = useRouter()
 const tokenStore = useTokenStore()
 
 // 使用计算属性获取头像和管理员名称
-const avatar = computed(() => tokenStore.adminInfo.avatar)
+const avatarUrl = computed(() => tokenStore.adminInfo.avatarUrl)
 const adminName = computed(() => tokenStore.adminInfo.username)
 
 // Dropdown menu command handler
@@ -28,8 +28,7 @@ const handleCommand = (command) => {
     tokenStore.removeToken()
     // 重置管理员信息为默认值
     tokenStore.setAdminInfo({
-      username: '管理员',
-      avatar: '@/assets/aa.jpg'
+      username: ''
     })
     // 跳转到登录页
     router.push('/login')
@@ -71,7 +70,7 @@ const handleCommand = (command) => {
                     <el-icon>
                         <Memo />
                     </el-icon>
-                    <span>用户信息</span>
+                    <span>用户管理</span>
                 </el-menu-item>
                 <!-- 管理员中心 -->
                 <el-sub-menu index="">
@@ -107,7 +106,7 @@ const handleCommand = (command) => {
                 <!-- command: 条目被点击后会触发,在事件函数上可以声明一个参数,接收条目对应的指令 -->
                 <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">
-                        <el-avatar :src="avatar" />
+                        <el-avatar :src="avatarUrl" />
                         <el-icon>
                             <CaretBottom />
                         </el-icon>
@@ -124,7 +123,7 @@ const handleCommand = (command) => {
                 <router-view></router-view>
             </el-main>
             <!-- 底部区域 -->
-            <el-footer>快递代拿后台管理系统 ©2024 Created by CWN</el-footer>
+            <el-footer>快递代拿后台管理系统 ©2025 Created by CWN</el-footer>
         </el-container>
     </el-container>
 </template>

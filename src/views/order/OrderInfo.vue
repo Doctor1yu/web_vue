@@ -63,7 +63,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { ordersInfoService } from '@/api/data' // 假设接口封装在data.js中
+import { ordersInfoService, deleteOrderService } from '@/api/data' // 假设接口封装在data.js中
+import { ElMessageBox, ElMessage } from 'element-plus'
 
 const loading = ref(true)
 const tableData = ref([])
@@ -106,8 +107,25 @@ const statusText = (status) => {
 
 // 删除操作
 const handleDelete = (row) => {
-  console.log('删除订单:', row)
-  // 这里可以调用删除接口
+  ElMessageBox.confirm('确定删除吗？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      deleteOrderService(row.id)
+        .then(() => {
+          ElMessage.success('删除成功');
+          fetchOrders();
+        })
+        .catch(error => {
+          console.error('删除失败:', error);
+          ElMessage.error('删除失败');
+        });
+    })
+    .catch(() => {
+      ElMessage.info('删除已取消');
+    });
 }
 
 // 计算创建时间是否 >= 3 天

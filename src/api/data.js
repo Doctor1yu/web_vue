@@ -20,6 +20,25 @@ export const ordersInfoService = async () => {
     }
 }
 
+// 删除订单
+export const deleteOrderService = async (id) => {
+  try {
+    const response = await request.delete(`/orders/delete?id=${id}`);
+    return {
+      code: 0,
+      message: '删除订单成功',
+      data: response.data
+    };
+  } catch (error) {
+    console.error('删除订单失败:', error);
+    return {
+      code: -1,
+      message: '删除订单失败',
+      data: null
+    };
+  }
+};
+
 // 获取所有反馈数据
 export const getFeedbacks = async () => {
   try {
@@ -61,21 +80,21 @@ export const updateFeedbackStatus = async (id, status) => {
 // 删除反馈（wait）
 export const deleteFeedback = async (id) => {
   try {
-    const response = await request.delete(`/api/feedbacks/${id}`)
+    const response = await request.delete(`/feedback/delete?id=${id}`);
     return {
       code: 0,
       message: '删除反馈成功',
       data: response.data
-    }
+    };
   } catch (error) {
-    console.error('删除反馈失败:', error)
+    console.error('删除反馈失败:', error);
     return {
       code: -1,
       message: '删除反馈失败',
       data: null
-    }
+    };
   }
-}
+};
 
 // 获取所有用户数据
 export const getUsers = async () => {
@@ -152,3 +171,4 @@ export const deleteUser = async (id) => {
     }
   }
 }
+
