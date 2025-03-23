@@ -77,7 +77,7 @@ export const updateFeedbackStatus = async (id, status) => {
   }
 }
 
-// 删除反馈（wait）
+// 删除反馈
 export const deleteFeedback = async (id) => {
   try {
     const response = await request.delete(`/feedback/delete?id=${id}`);

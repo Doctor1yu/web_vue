@@ -70,7 +70,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getUsers } from '@/api/data' // 假设接口封装在data.js中
-import { ElMessage } from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus' // 导入 Element Plus 组件
 
 const loading = ref(true)
 const tableData = ref([])
@@ -129,20 +129,54 @@ const statusText = (status) => {
 
 // 重置密码
 const handleResetPassword = (row) => {
-  console.log('重置密码:', row)
-  // 这里可以调用重置密码接口
+  ElMessageBox.confirm('确定重置该用户的密码吗？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      // 这里可以调用重置密码接口
+      console.log('重置密码:', row);
+      ElMessage.success('重置密码成功');
+    })
+    .catch(() => {
+      ElMessage.info('重置密码已取消');
+    });
 }
 
 // 限制登录
 const handleRestrictLogin = (row) => {
-  console.log('限制登录:', row)
-  // 这里可以调用限制登录接口
+  const action = row.status === '1' ? '限制登录' : '解除限制';
+  ElMessageBox.confirm(`确定${action}该用户吗？`, '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      // 这里可以调用限制登录接口
+      console.log(`${action}:`, row);
+      ElMessage.success(`${action}成功`);
+    })
+    .catch(() => {
+      ElMessage.info(`${action}已取消`);
+    });
 }
 
 // 删除用户
 const handleDelete = (row) => {
-  console.log('删除用户:', row)
-  // 这里可以调用删除用户接口
+  ElMessageBox.confirm('确定删除该用户吗？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      // 这里可以调用删除用户接口
+      console.log('删除用户:', row);
+      ElMessage.success('删除成功');
+    })
+    .catch(() => {
+      ElMessage.info('删除已取消');
+    });
 }
 
 // 筛选后的数据
