@@ -63,7 +63,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { ordersInfoService, deleteOrderService } from '@/api/data' // 假设接口封装在data.js中
+import { ordersInfoService, deleteOrderService } from '@/api/order'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 const loading = ref(true)

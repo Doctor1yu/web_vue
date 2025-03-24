@@ -10,12 +10,78 @@ export const adminLoginService = (loginData) => {
     return request.post('/admin/login', params)
 }
 
-//修改密码
-export const adminPwdUpdateService = (adminPwdDaya) => {
-    return request.patch('/admin/updatePwd', adminPwdDaya)
-}
+// 修改管理员密码
+export const adminPwdUpdateService = async (data) => {
+    try {
+      const response = await request.patch('/admin/updatePwd', data);
+      return {
+        code: 0,
+        message: '密码修改成功',
+        data: response.data
+      };
+    } catch (error) {
+      console.error('密码修改失败:', error);
+      return {
+        code: -1,
+        message: '密码修改失败',
+        data: null
+      };
+    }
+  };
 
-// 获取管理员信息接口
-export const getAdminInfoService = () => {
-    return request.get('/admin/info')
-}
+// 获取所有管理员
+export const getAdmins = async () => {
+  try {
+    const response = await request.get('/admin/all');
+    return {
+      code: 0,
+      message: '获取管理员数据成功',
+      data: response.data
+    };
+  } catch (error) {
+    console.error('获取管理员数据失败:', error);
+    return {
+      code: -1,
+      message: '获取管理员数据失败',
+      data: []
+    };
+  }
+};
+
+// 添加管理员
+export const addAdminService = async (data) => {
+  try {
+    const response = await request.post('/admin/add', data);
+    return {
+      code: 0,
+      message: '添加管理员成功',
+      data: response.data
+    };
+  } catch (error) {
+    console.error('添加管理员失败:', error);
+    return {
+      code: -1,
+      message: '添加管理员失败',
+      data: null
+    };
+  }
+};
+
+// 删除管理员
+export const deleteAdminService = async (id) => {
+  try {
+    const response = await request.delete(`/admin/delete?id=${id}`);
+    return {
+      code: 0,
+      message: '删除管理员成功',
+      data: response.data
+    };
+  } catch (error) {
+    console.error('删除管理员失败:', error);
+    return {
+      code: -1,
+      message: '删除管理员失败',
+      data: null
+    };
+  }
+};

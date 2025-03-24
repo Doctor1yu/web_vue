@@ -56,7 +56,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getFeedbacks, deleteFeedback, updateFeedbackStatus } from '@/api/data' // 假设接口封装在data.js中
+import { getFeedbacks, deleteFeedback, updateFeedbackStatus } from '@/api/feedback'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(true)

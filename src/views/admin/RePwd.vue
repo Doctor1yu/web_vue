@@ -20,7 +20,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { adminPwdUpdateService } from '@/api/admin.js'
+import { adminPwdUpdateService } from '@/api/admin'
 import { ElMessage } from 'element-plus'
 
 // 表单数据
@@ -57,7 +57,25 @@ const formRef = ref(null)
 
 // 提交表单
 const submitForm = async () => {
-
+    try {
+        // 验证表单
+        await formRef.value.validate()
+        // 调用修改密码的 API
+        const res = await adminPwdUpdateService({
+            old_pwd: form.old_pwd,
+            new_pwd: form.new_pwd,
+            re_pwd: form.re_pwd
+        })
+        if (res.code === 0) {
+            ElMessage.success(res.message || '密码修改成功')
+            resetForm() // 重置表单
+        } else {
+            ElMessage.error(res.message || '密码修改失败')
+        }
+    } catch (error) {
+        console.error('密码修改失败:', error)
+        ElMessage.error('密码修改失败')
+    }
 }
 
 // 重置表单

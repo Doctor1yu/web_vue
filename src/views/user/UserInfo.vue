@@ -1,15 +1,37 @@
 <template>
   <div style="width: 100%;">
-    <!-- 状态筛选 -->
-    <el-select
-      v-model="filterStatus"
-      placeholder="请选择用户状态"
-      clearable
-      style="margin-bottom: 20px; width: 200px;"
-    >
-      <el-option label="正常" value="1" />
-      <el-option label="限制登录" value="0" />
-    </el-select>
+    <!-- 筛选区域 -->
+    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+      <!-- 状态筛选 -->
+      <el-select
+        v-model="filterStatus"
+        placeholder="请选择用户状态"
+        clearable
+        style="width: 200px;"
+      >
+        <el-option label="正常" value="1" />
+        <el-option label="限制登录" value="2" />
+      </el-select>
+
+      <!-- 角色筛选 -->
+      <el-select
+        v-model="filterRole"
+        placeholder="请选择用户角色"
+        clearable
+        style="width: 200px;"
+      >
+        <el-option label="普通用户" value="1" />
+        <el-option label="接单员" value="2" />
+      </el-select>
+
+      <!-- 学号检索 -->
+      <el-input
+        v-model="searchStudentId"
+        placeholder="请输入学号"
+        clearable
+        style="width: 200px;"
+      />
+    </div>
 
     <el-table :data="filteredData" style="width: 100%" v-loading="loading" fit>
       <el-table-column prop="id" label="用户ID" width="100" />
@@ -69,12 +91,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getUsers } from '@/api/data' // 假设接口封装在data.js中
+import { getUsers, resetUserPassword, restrictUserLogin, deleteUser } from '@/api/user'
 import { ElMessageBox, ElMessage } from 'element-plus' // 导入 Element Plus 组件
 
 const loading = ref(true)
 const tableData = ref([])
-const filterStatus = ref('') // 筛选状态
+const filterStatus = ref('') // 状态筛选
+const filterRole = ref('') // 角色筛选
+const searchStudentId = ref('') // 学号检索
 
 // 获取用户数据
 const fetchUsers = async () => {
@@ -134,10 +158,18 @@ const handleResetPassword = (row) => {
     cancelButtonText: '取消',
     type: 'warning',
   })
-    .then(() => {
-      // 这里可以调用重置密码接口
-      console.log('重置密码:', row);
-      ElMessage.success('重置密码成功');
+    .then(async () => {
+      try {
+        const res = await resetUserPassword(row.studentId);
+        if (res.code === 0) {
+          ElMessage.success('重置密码成功');
+        } else {
+          ElMessage.error(res.message || '重置密码失败');
+        }
+      } catch (error) {
+        console.error('重置密码失败:', error);
+        ElMessage.error('重置密码失败');
+      }
     })
     .catch(() => {
       ElMessage.info('重置密码已取消');
@@ -147,15 +179,25 @@ const handleResetPassword = (row) => {
 // 限制登录
 const handleRestrictLogin = (row) => {
   const action = row.status === '1' ? '限制登录' : '解除限制';
+  const newStatus = row.status === '1' ? '2' : '1';
   ElMessageBox.confirm(`确定${action}该用户吗？`, '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
   })
-    .then(() => {
-      // 这里可以调用限制登录接口
-      console.log(`${action}:`, row);
-      ElMessage.success(`${action}成功`);
+    .then(async () => {
+      try {
+        const res = await restrictUserLogin(row.studentId, newStatus);
+        if (res.code === 0) {
+          ElMessage.success(`${action}成功`);
+          row.status = newStatus; // 更新本地状态
+        } else {
+          ElMessage.error(res.message || `${action}失败`);
+        }
+      } catch (error) {
+        console.error(`${action}失败:`, error);
+        ElMessage.error(`${action}失败`);
+      }
     })
     .catch(() => {
       ElMessage.info(`${action}已取消`);
@@ -169,10 +211,19 @@ const handleDelete = (row) => {
     cancelButtonText: '取消',
     type: 'warning',
   })
-    .then(() => {
-      // 这里可以调用删除用户接口
-      console.log('删除用户:', row);
-      ElMessage.success('删除成功');
+    .then(async () => {
+      try {
+        const res = await deleteUser(row.id);
+        if (res.code === 0) {
+          ElMessage.success('删除成功');
+          fetchUsers(); // 重新获取用户数据
+        } else {
+          ElMessage.error(res.message || '删除失败');
+        }
+      } catch (error) {
+        console.error('删除失败:', error);
+        ElMessage.error('删除失败');
+      }
     })
     .catch(() => {
       ElMessage.info('删除已取消');
@@ -181,8 +232,21 @@ const handleDelete = (row) => {
 
 // 筛选后的数据
 const filteredData = computed(() => {
-  if (!filterStatus.value) return tableData.value
-  return tableData.value.filter(item => item.status === filterStatus.value)
+  return tableData.value.filter(item => {
+    // 状态筛选
+    if (filterStatus.value && item.status !== filterStatus.value) {
+      return false
+    }
+    // 角色筛选
+    if (filterRole.value && item.rule !== filterRole.value) {
+      return false
+    }
+    // 学号检索
+    if (searchStudentId.value && !item.studentId.includes(searchStudentId.value)) {
+      return false
+    }
+    return true
+  })
 })
 
 // 格式化时间
