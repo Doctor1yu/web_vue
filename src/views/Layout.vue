@@ -137,7 +137,7 @@ const handleCommand = (command) => {
 
         &__logo {
             height: 120px;
-            background: url('@/assets/images/summer2.png') no-repeat center / 120px auto;
+            background: url('http://stm89m2wy.hd-bkt.clouddn.com/back/image/summer.png') no-repeat center / 120px auto;
         }
 
         .el-menu {
