@@ -15,7 +15,7 @@ import FeedbackVue from '@/views/feedback/Feedback.vue'
 const routes = [
     { path: '/login', component: LoginVue },
     {
-        path: '/', component: LayoutVue, redirect: '/home', children: [
+        path: '/', component: LayoutVue, redirect: '/order', children: [
             { path: '/home', component: HomeVue },
             { path: '/order', component: OrderInfoVue },
             { path: '/feedback', component: FeedbackVue },
