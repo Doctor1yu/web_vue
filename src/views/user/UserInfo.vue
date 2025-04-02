@@ -38,10 +38,10 @@
       <el-table-column prop="studentId" label="学号" />
       <el-table-column prop="phoneNumber" label="联系电话" />
       <el-table-column prop="nickName" label="昵称" />
-      <el-table-column prop="rule" label="角色" width="140">
+      <el-table-column prop="role" label="角色" width="140">
         <template #default="{ row }">
-          <el-tag :type="ruleTagType(row.rule)">
-            {{ ruleText(row.rule) }}
+          <el-tag :type="roleTagType(row.role)">
+            {{ roleText(row.role) }}
           </el-tag>
         </template>
       </el-table-column>
@@ -116,8 +116,8 @@ const fetchUsers = async () => {
 }
 
 // 角色标签类型
-const ruleTagType = (rule) => {
-  switch (rule) {
+const roleTagType = (role) => {
+  switch (role) {
     case '1': return 'info' // 普通用户显示灰色
     case '2': return 'success' // 接单员显示绿色
     default: return 'info'
@@ -125,8 +125,8 @@ const ruleTagType = (rule) => {
 }
 
 // 角色文本
-const ruleText = (rule) => {
-  switch (rule) {
+const roleText = (role) => {
+  switch (role) {
     case '1': return '普通用户'
     case '2': return '接单员'
     default: return '未知'
@@ -238,7 +238,7 @@ const filteredData = computed(() => {
       return false
     }
     // 角色筛选
-    if (filterRole.value && item.rule !== filterRole.value) {
+    if (filterRole.value && item.role !== filterRole.value) {
       return false
     }
     // 学号检索

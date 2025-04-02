@@ -16,8 +16,6 @@
         clearable
         style="width: 200px;"
       >
-        <el-option label="已申请" value="1" />
-        <el-option label="未申请" value="2" />
         <el-option label="通过" value="3" />
         <el-option label="拒绝" value="4" />
       </el-select>
@@ -35,7 +33,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="reviewerId" label="审核人ID" />
+      <el-table-column prop="reviewerName" label="审核人姓名" />
       <el-table-column prop="remark" label="审核备注" />
       <el-table-column prop="appliedAt" label="申请时间" width="180">
         <template #default="{ row }">
@@ -53,25 +51,52 @@
             link
             type="primary"
             size="small"
-            @click="handleProcess(row)"
+            @click="openProcessDialog(row)"
           >
             处理申请
           </el-button>
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 处理申请弹窗 -->
+    <el-dialog v-model="processDialogVisible" title="处理申请" width="30%">
+      <el-form :model="processForm" label-width="80px">
+        <el-form-item label="状态">
+          <el-select v-model="processForm.status" placeholder="请选择状态">
+            <el-option label="通过" value="3" />
+            <el-option label="拒绝" value="4" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="审核备注">
+          <el-input v-model="processForm.remark" placeholder="请输入审核备注" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="processDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitProcess">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getApplications } from '@/api/applications'
-import { ElMessageBox, ElMessage } from 'element-plus'
+import { getApplications, updateApplicationStatus } from '@/api/applications'
+import { useTokenStore } from '@/stores/token' // 导入 token.js 的 store
+import { ElMessage } from 'element-plus'
 
 const loading = ref(true)
 const tableData = ref([])
 const searchStudentId = ref('') // 学号搜索
 const filterStatus = ref('') // 状态筛选
+const processDialogVisible = ref(false) // 控制弹窗显示
+const processForm = ref({
+  status: '',
+  remark: ''
+})
+const currentRow = ref(null) // 当前处理的申请
+const tokenStore = useTokenStore()
 
 // 获取申请数据
 const fetchApplications = async () => {
@@ -112,28 +137,54 @@ const statusText = (status) => {
   }
 }
 
-// 处理申请
-const handleProcess = (row) => {
-  ElMessageBox.prompt('请输入处理结果（1: 已申请, 2: 未申请, 3: 通过, 4: 拒绝）', '处理申请', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputPattern: /^[1-4]$/,
-    inputErrorMessage: '请输入 1（已申请）、2（未申请）、3（通过）或 4（拒绝）'
-  })
-    .then(async ({ value }) => {
-      const newStatus = value
-      try {
-        // 这里可以调用处理申请的 API
-        ElMessage.success('处理成功')
-        row.status = newStatus // 更新本地状态
-      } catch (error) {
-        console.error('处理失败:', error)
-        ElMessage.error('处理失败')
-      }
-    })
-    .catch(() => {
-      ElMessage.info('处理已取消')
-    })
+// 打开处理申请弹窗
+const openProcessDialog = (row) => {
+  currentRow.value = row
+  processForm.value = {
+    status: row.status === '1' ? '' : row.status, // 如果状态是1（已申请），则默认不选择
+    remark: row.remark || ''
+  }
+  processDialogVisible.value = true
+}
+
+// 提交处理申请
+const submitProcess = async () => {
+  const { status, remark } = processForm.value
+  if (!status) {
+    ElMessage.warning('请选择状态')
+    return
+  }
+
+  // 打印调试信息
+  console.log('tokenStore.adminInfo:', tokenStore.adminInfo)
+  console.log('tokenStore.adminInfo.username:', tokenStore.adminInfo.username)
+
+  if (!tokenStore.adminInfo || !tokenStore.adminInfo.username) {
+    ElMessage.error('无法获取审核人信息，请重新登录')
+    return
+  }
+
+  try {
+    const res = await updateApplicationStatus(
+      currentRow.value.studentId,
+      status,
+      remark,
+      tokenStore.adminInfo.username
+    )
+
+    if (res.code === 0) {
+      ElMessage.success('处理成功')
+      currentRow.value.status = status
+      currentRow.value.remark = remark
+      currentRow.value.reviewerName = tokenStore.adminInfo.username
+      processDialogVisible.value = false
+    } else {
+      ElMessage.error(res.message || '处理失败')
+    }
+  } catch (error) {
+    console.error('处理失败:', error)
+    ElMessage.error('处理失败')
+  }
 }
 
 // 筛选后的数据

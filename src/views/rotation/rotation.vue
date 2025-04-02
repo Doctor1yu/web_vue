@@ -10,7 +10,7 @@
         style="width: 200px;"
       />
       <!-- 添加轮播图按钮 -->
-      <el-button type="primary" @click="handleAddRotation">添加轮播图</el-button>
+      <el-button type="primary" @click="addDialogVisible = true">添加轮播图</el-button>
     </div>
 
     <!-- 轮播图列表 -->
@@ -35,6 +35,22 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 添加轮播图弹窗 -->
+    <el-dialog v-model="addDialogVisible" title="添加轮播图" width="30%">
+      <el-form :model="addForm" label-width="80px">
+        <el-form-item label="主题">
+          <el-input v-model="addForm.theme" placeholder="请输入主题" />
+        </el-form-item>
+        <el-form-item label="URL">
+          <el-input v-model="addForm.rotationUrl" placeholder="请输入轮播图URL" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitAddRotation">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -46,6 +62,11 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 const loading = ref(true)
 const tableData = ref([])
 const searchTheme = ref('') // 主题搜索
+const addDialogVisible = ref(false) // 控制弹窗显示
+const addForm = ref({
+  theme: '',
+  rotationUrl: ''
+})
 
 // 获取轮播图数据
 const fetchRotations = async () => {
@@ -90,33 +111,28 @@ const handleDelete = (row) => {
     })
 }
 
-// 添加轮播图
-const handleAddRotation = async () => {
-  ElMessageBox.prompt('请输入轮播图主题和URL', '添加轮播图', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputPlaceholder: '主题,URL',
-    inputPattern: /^[^,]+,[^,]+$/, // 确保输入格式为 "主题,URL"
-    inputErrorMessage: '请输入主题和URL，用逗号分隔'
-  })
-    .then(async ({ value }) => {
-      const [theme, rotationUrl] = value.split(',')
-      try {
-        const res = await addRotation(theme, rotationUrl)
-        if (res.code === 0) {
-          ElMessage.success('添加轮播图成功')
-          fetchRotations() // 重新获取数据
-        } else {
-          ElMessage.error(res.message || '添加轮播图失败')
-        }
-      } catch (error) {
-        console.error('添加轮播图失败:', error)
-        ElMessage.error('添加轮播图失败')
-      }
-    })
-    .catch(() => {
-      ElMessage.info('添加已取消')
-    })
+// 提交添加轮播图
+const submitAddRotation = async () => {
+  const { theme, rotationUrl } = addForm.value
+  if (!theme || !rotationUrl) {
+    ElMessage.warning('请填写主题和URL')
+    return
+  }
+
+  try {
+    const res = await addRotation(theme, rotationUrl)
+    if (res.code === 0) {
+      ElMessage.success('添加轮播图成功')
+      addDialogVisible.value = false // 关闭弹窗
+      fetchRotations() // 重新获取数据
+      addForm.value = { theme: '', rotationUrl: '' } // 重置表单
+    } else {
+      ElMessage.error(res.message || '添加轮播图失败')
+    }
+  } catch (error) {
+    console.error('添加轮播图失败:', error)
+    ElMessage.error('添加轮播图失败')
+  }
 }
 
 // 筛选后的数据
