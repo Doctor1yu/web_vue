@@ -8,7 +8,9 @@ import {
     User,
     EditPen,
     SwitchButton,
-    CaretBottom
+    CaretBottom,
+    Picture,
+    Document
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 import { useTokenStore } from '@/stores/token'
@@ -51,26 +53,40 @@ const handleCommand = (command) => {
                     </el-icon>
                     <span>首页</span>
                 </el-menu-item>
-                <!-- 2、订单 -->
+                <!-- 2、轮播图管理 -->
+                <el-menu-item index="/rotation">
+                    <el-icon>
+                        <Picture />
+                    </el-icon>
+                    <span>轮播图管理</span>
+                </el-menu-item>
+                <!-- 3、订单管理 -->
                 <el-menu-item index="/order">
                     <el-icon>
                         <Management />
                     </el-icon>
                     <span>订单管理</span>
                 </el-menu-item>
-                <!-- 3、反馈管理 -->
+                <!-- 4、反馈管理 -->
                 <el-menu-item index="/feedback">
                     <el-icon>
                         <Promotion />
                     </el-icon>
                     <span>反馈管理</span>
                 </el-menu-item>
-                <!-- 3、用户 -->
+                <!-- 5、用户管理 -->
                 <el-menu-item index="/user">
                     <el-icon>
                         <Memo />
                     </el-icon>
                     <span>用户管理</span>
+                </el-menu-item>
+                <!-- 6、申请列表 -->
+                <el-menu-item index="/applications">
+                    <el-icon>
+                        <Document />
+                    </el-icon>
+                    <span>申请列表</span>
                 </el-menu-item>
                 <!-- 管理员中心 -->
                 <el-sub-menu index="">

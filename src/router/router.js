@@ -10,6 +10,8 @@ import RePwdVue from '@/views/admin/RePwd.vue'
 import HomeVue from '@/views/home/Home.vue'
 import AdminInfoVue from '@/views/admin/AdminInfo.vue'
 import FeedbackVue from '@/views/feedback/Feedback.vue'
+import applicationsVue from '@/views/applicationss/applications.vue'
+import rotationVue from '@/views/rotation/rotation.vue'
 
 //定义路由关系
 const routes = [
@@ -17,11 +19,13 @@ const routes = [
     {
         path: '/', component: LayoutVue, redirect: '/order', children: [
             { path: '/home', component: HomeVue },
+            { path: '/rotation', component: rotationVue },
             { path: '/order', component: OrderInfoVue },
             { path: '/feedback', component: FeedbackVue },
             { path: '/user', component: UserInfoVue },
+            { path: '/applications', component: applicationsVue },
             { path: '/admin/info', component: AdminInfoVue },
-            { path: '/admin/repwd', component: RePwdVue }
+            { path: '/admin/repwd', component: RePwdVue },
             
         ]
     }

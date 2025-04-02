@@ -1,0 +1,22 @@
+//导入request.js请求工具
+import request from '@/utils/request.js'
+
+// 获取所有申请数据
+export const getApplications = async () => {
+  try {
+    const response = await request.get('/api/applications');
+    return {
+      code: 0,
+      message: '获取申请数据成功',
+      data: response.data
+    };
+  } catch (error) {
+    console.error('获取申请数据失败:', error);
+    return {
+      code: -1,
+      message: '获取申请数据失败',
+      data: []
+    };
+  }
+};
+

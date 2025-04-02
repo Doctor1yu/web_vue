@@ -153,7 +153,7 @@ const statusText = (status) => {
 
 // 重置密码
 const handleResetPassword = (row) => {
-  ElMessageBox.confirm('确定重置该用户的密码吗？', '警告', {
+    ElMessageBox.confirm('确定重置该用户的密码吗？', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
