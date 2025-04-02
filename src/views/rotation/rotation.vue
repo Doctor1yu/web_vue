@@ -40,7 +40,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getRotations, deleteRotation } from '@/api/rotation'
+import { getRotations, deleteRotation, addRotation } from '@/api/rotation'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 const loading = ref(true)
@@ -91,9 +91,32 @@ const handleDelete = (row) => {
 }
 
 // 添加轮播图
-const handleAddRotation = () => {
-  // 这里可以跳转到添加轮播图页面或打开弹窗
-  ElMessage.info('添加轮播图功能待实现')
+const handleAddRotation = async () => {
+  ElMessageBox.prompt('请输入轮播图主题和URL', '添加轮播图', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPlaceholder: '主题,URL',
+    inputPattern: /^[^,]+,[^,]+$/, // 确保输入格式为 "主题,URL"
+    inputErrorMessage: '请输入主题和URL，用逗号分隔'
+  })
+    .then(async ({ value }) => {
+      const [theme, rotationUrl] = value.split(',')
+      try {
+        const res = await addRotation(theme, rotationUrl)
+        if (res.code === 0) {
+          ElMessage.success('添加轮播图成功')
+          fetchRotations() // 重新获取数据
+        } else {
+          ElMessage.error(res.message || '添加轮播图失败')
+        }
+      } catch (error) {
+        console.error('添加轮播图失败:', error)
+        ElMessage.error('添加轮播图失败')
+      }
+    })
+    .catch(() => {
+      ElMessage.info('添加已取消')
+    })
 }
 
 // 筛选后的数据

@@ -38,3 +38,22 @@ export const deleteRotation = async (id) => {
     };
   }
 };
+
+// 添加轮播图
+export const addRotation = async (theme, rotationUrl) => {
+  try {
+    const response = await request.post(`/rotation/add?theme=${theme}&rotationUrl=${rotationUrl}`);
+    return {
+      code: 0,
+      message: '添加轮播图成功',
+      data: response.data
+    };
+  } catch (error) {
+    console.error('添加轮播图失败:', error);
+    return {
+      code: -1,
+      message: '添加轮播图失败',
+      data: null
+    };
+  }
+};
