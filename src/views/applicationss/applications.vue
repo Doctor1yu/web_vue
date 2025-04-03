@@ -166,7 +166,7 @@ const submitProcess = async () => {
 
   try {
     const res = await updateApplicationStatus(
-      currentRow.value.studentId,
+      currentRow.value.id,
       status,
       remark,
       tokenStore.adminInfo.username
@@ -178,6 +178,9 @@ const submitProcess = async () => {
       currentRow.value.remark = remark
       currentRow.value.reviewerName = tokenStore.adminInfo.username
       processDialogVisible.value = false
+
+      // 提交成功后刷新界面
+      fetchApplications()
     } else {
       ElMessage.error(res.message || '处理失败')
     }

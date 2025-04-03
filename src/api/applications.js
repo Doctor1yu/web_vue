@@ -21,10 +21,10 @@ export const getApplications = async () => {
 };
 
 // 更新申请状态
-export const updateApplicationStatus = async (studentId, status, remark, reviewerName) => {
+export const updateApplicationStatus = async (id, status, remark, reviewerName) => {
   try {
     const response = await request.patch(
-      `/applications/status?studentId=${studentId}&status=${status}&remark=${remark}&reviewerName=${reviewerName}`
+      `/applications/status?id=${id}&status=${status}&remark=${remark}&reviewerName=${reviewerName}`
     );
     return {
       code: 0,
