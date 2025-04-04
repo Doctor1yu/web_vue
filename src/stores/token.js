@@ -22,7 +22,10 @@ export const useTokenStore = defineStore('token', () => {
 
     //4.设置管理员信息
     const setAdminInfo = (info) => {
-        adminInfo.value = info
+        adminInfo.value = {
+            ...adminInfo.value,
+            ...info
+        }
     }
 
     return {

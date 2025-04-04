@@ -1,73 +1,96 @@
 <template>
   <div class="login-container">
-    <h2>管理员登录</h2>
-    <form @submit.prevent="handleLogin">
-      <div class="form-group">
-        <label for="username">用户名</label>
-        <input
-          type="text"
-          id="username"
-          v-model="loginForm.username"
-          placeholder="请输入用户名"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label for="password">密码</label>
-        <input
-          type="password"
-          id="password"
-          v-model="loginForm.password"
-          placeholder="请输入密码"
-          required
-        />
-      </div>
-      <button type="submit">登录</button>
-    </form>
-    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <div class="login-box">
+      <el-card class="login-card">
+        <template #header>
+          <h2 class="login-title">管理员登录</h2>
+        </template>
+        <el-form 
+          :model="loginForm" 
+          ref="loginFormRef"
+          :rules="rules"
+          @submit.prevent="handleLogin"
+        >
+          <el-form-item prop="username">
+            <el-input
+              v-model="loginForm.username"
+              placeholder="请输入用户名"
+            >
+              <template #prefix>
+                <el-icon><User /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input
+              v-model="loginForm.password"
+              type="password"
+              placeholder="请输入密码"
+              show-password
+            >
+              <template #prefix>
+                <el-icon><Lock /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="handleLogin" class="login-button">
+              登录
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </el-card>
+    </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTokenStore } from '@/stores/token'
 import { adminLoginService } from '@/api/admin.js'
 import { ElMessage } from 'element-plus'
+import { User, Lock } from '@element-plus/icons-vue'
 
-export default {
-  setup() {
-    const router = useRouter()
-    const tokenStore = useTokenStore()
+const router = useRouter()
+const tokenStore = useTokenStore()
+const loginFormRef = ref(null)
 
-    const loginForm = ref({
-      username: '',
-      password: ''
-    })
-    const errorMessage = ref('')
+const loginForm = ref({
+  username: '',
+  password: ''
+})
 
-    const handleLogin = async () => {
+const rules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度应在 3 到 20 个字符之间', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码长度至少为 6 个字符', trigger: 'blur' }
+  ]
+}
+
+const handleLogin = async () => {
+  if (!loginFormRef.value) return
+  
+  await loginFormRef.value.validate(async (valid) => {
+    if (valid) {
       try {
-        // 调用登录接口
         const response = await adminLoginService(loginForm.value)
         
-        // 确保 token 存在
         if (response.data) {
-          // 直接使用 response.data 作为 token
           tokenStore.setToken(response.data)
 
-          // 设置管理员信息 - 从 token 中解析
           try {
             const tokenPayload = JSON.parse(atob(response.data.split('.')[1]))
             tokenStore.setAdminInfo({
-              username: tokenPayload.claims.username || loginForm.value.username,
-              avatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642ab5acc11d8d85jpeg.jpeg'
+              ...tokenStore.adminInfo,
+              username: tokenPayload.claims.username || loginForm.value.username
             })
 
-            // 登录成功提示
             ElMessage.success('登录成功')
-            
-            // 登录成功后跳转到首页
             router.push('/home')
           } catch (parseError) {
             console.error('解析 token 失败:', parseError)
@@ -75,60 +98,69 @@ export default {
           }
         } else {
           ElMessage.error('登录失败：未获取到有效 token')
-          console.error('未找到 token')
         }
       } catch (error) {
-        // 处理登录失败
         ElMessage.error('登录失败，请检查用户名和密码')
         console.error('登录失败', error)
       }
     }
-
-    return {
-      loginForm,
-      errorMessage,
-      handleLogin
-    }
-  }
+  })
 }
 </script>
 
 <style scoped>
 .login-container {
-  max-width: 300px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('http://stm89m2wy.hd-bkt.clouddn.com/back/image/green.jpg') no-repeat center center;
+  background-size: cover;
+}
+
+.login-box {
+  width: 400px;
+  margin: auto;
+}
+
+.login-card {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 8px;
+}
+
+.login-title {
   text-align: center;
+  color: #409EFF;
+  font-size: 24px;
+  margin: 0;
+  padding: 10px 0;
 }
-.form-group {
-  margin-bottom: 15px;
-  text-align: left;
+
+:deep(.el-input__wrapper) {
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+  padding: 4px 11px !important;
+  height: 30px !important;
 }
-label {
-  display: block;
-  margin-bottom: 5px;
+
+:deep(.el-input__inner) {
+  height: 100% !important;
+  line-height: 35px !important;
+  font-size: 15px;
 }
-input {
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #409EFF inset;
+}
+
+.login-button {
   width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
+  padding: 12px 0;
 }
-button {
-  width: 100%;
+
+:deep(.el-card__header) {
   padding: 10px;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-button:hover {
-  background-color: #3aa876;
-}
-.error-message {
-  color: red;
-  margin-top: 10px;
+  border-bottom: 1px solid #ebeef5;
 }
 </style>
