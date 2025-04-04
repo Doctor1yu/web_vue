@@ -50,13 +50,11 @@ export default {
       try {
         // 调用登录接口
         const response = await adminLoginService(loginForm.value)
-        console.log('完整登录响应:', response)
         
         // 确保 token 存在
         if (response.data) {
           // 直接使用 response.data 作为 token
           tokenStore.setToken(response.data)
-          console.log('Token 已存储:', tokenStore.token)
 
           // 设置管理员信息 - 从 token 中解析
           try {
