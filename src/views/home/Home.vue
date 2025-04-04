@@ -80,11 +80,11 @@ const initHomeData = async () => {
     const res = await getHomeDataService()
     if (res.code === 0) {
         statsItems.value = [
-            { label: '用户总数', value: res.data.userCount, path: '/user' },
+            { label: '轮播图总数', value: res.data.rotationCount, path: '/rotation' },
             { label: '订单总数', value: res.data.orderCount, path: '/order' },
-            { label: '申请接单数', value: res.data.applyCount, path: '/applications' },
             { label: '反馈总数', value: res.data.feedbackCount, path: '/feedback' },
-            { label: '轮播图总数', value: res.data.rotationCount, path: '/rotation' }
+            { label: '用户总数', value: res.data.userCount, path: '/user' },
+            { label: '申请接单数', value: res.data.applyCount, path: '/applications' },
         ]
     }
 }

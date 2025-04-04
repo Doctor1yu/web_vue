@@ -14,14 +14,18 @@ import {
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 import { useTokenStore } from '@/stores/token'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const tokenStore = useTokenStore()
 
 // 使用计算属性获取头像和管理员名称
 const avatarUrl = computed(() => tokenStore.adminInfo.avatarUrl)
 const adminName = computed(() => tokenStore.adminInfo.username)
+
+// 添加 activeMenu 计算属性
+const activeMenu = computed(() => route.path)
 
 // Dropdown menu command handler
 const handleCommand = (command) => {
@@ -45,7 +49,7 @@ const handleCommand = (command) => {
         <el-aside width="200px">
             <div class="el-aside__logo"></div>
             <!-- element-plus的菜单标签 -->
-            <el-menu active-text-color="#ffd04b" background-color="#232323" text-color="#fff" router>
+            <el-menu active-text-color="#ffd04b" background-color="#232323" text-color="#fff" router :default-active="activeMenu">
                 <!-- 1、首页 -->
                 <el-menu-item index="/home">
                     <el-icon>

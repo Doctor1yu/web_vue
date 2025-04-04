@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useTokenStore } from '@/stores/token'
 
 //导入组件
 import LoginVue from '@/views/login/Login.vue'
@@ -35,6 +36,34 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes: routes
+})
+
+// 定义白名单路由
+const whiteList = ['/login'] // 不需要登录就可以访问的路由
+
+// 创建路由守卫
+router.beforeEach((to, from, next) => {
+  const tokenStore = useTokenStore()
+  const token = tokenStore.token
+  
+  if (token) {
+    // 有token
+    if (to.path === '/login') {
+      // 如果已登录，访问登录页则重定向到首页
+      next({ path: '/home' })
+    } else {
+      next() // 正常访问
+    }
+  } else {
+    // 没有token
+    if (whiteList.includes(to.path)) {
+      // 在白名单中，直接进入
+      next()
+    } else {
+      // 不在白名单中，重定向到登录页
+      next(`/login?redirect=${to.path}`)
+    }
+  }
 })
 
 //导出路由
