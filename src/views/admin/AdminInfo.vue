@@ -87,7 +87,6 @@ const fetchAdmins = async () => {
   try {
     const res = await getAdmins()
     if (res.code === 0) {
-      console.log('管理员数据:', res.data) // 打印数据
       tableData.value = res.data
     } else {
       ElMessage.error(res.message || '获取管理员数据失败')

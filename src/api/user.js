@@ -57,22 +57,3 @@ export const restrictUserLogin = async (studentId, status) => {
     };
   }
 };
-
-// 删除用户
-export const deleteUser = async (id) => {
-  try {
-    const response = await request.delete(`/users/delete?id=${id}`);
-    return {
-      code: 0,
-      message: '删除用户成功',
-      data: response.data
-    };
-  } catch (error) {
-    console.error('删除用户失败:', error);
-    return {
-      code: -1,
-      message: '删除用户失败',
-      data: null
-    };
-  }
-};

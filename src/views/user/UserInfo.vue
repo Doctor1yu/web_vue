@@ -75,14 +75,6 @@
           >
             {{ row.status === '1' ? '限制登录' : '解除限制' }}
           </el-button>
-          <el-button
-            link
-            type="danger"
-            size="small"
-            @click="handleDelete(row)"
-          >
-            删除
-          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -91,7 +83,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getUsers, resetUserPassword, restrictUserLogin, deleteUser } from '@/api/user'
+import { getUsers, resetUserPassword, restrictUserLogin } from '@/api/user'
 import { ElMessageBox, ElMessage } from 'element-plus' // 导入 Element Plus 组件
 
 const loading = ref(true)
@@ -201,32 +193,6 @@ const handleRestrictLogin = (row) => {
     })
     .catch(() => {
       ElMessage.info(`${action}已取消`);
-    });
-}
-
-// 删除用户
-const handleDelete = (row) => {
-  ElMessageBox.confirm('确定删除该用户吗？', '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(async () => {
-      try {
-        const res = await deleteUser(row.id);
-        if (res.code === 0) {
-          ElMessage.success('删除成功');
-          fetchUsers(); // 重新获取用户数据
-        } else {
-          ElMessage.error(res.message || '删除失败');
-        }
-      } catch (error) {
-        console.error('删除失败:', error);
-        ElMessage.error('删除失败');
-      }
-    })
-    .catch(() => {
-      ElMessage.info('删除已取消');
     });
 }
 

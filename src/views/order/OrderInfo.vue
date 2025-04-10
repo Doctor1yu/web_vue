@@ -12,14 +12,6 @@
       <el-option label="已完成" value="3" />
     </el-select>
 
-    <!-- 创建时间筛选 -->
-    <el-checkbox
-      v-model="filterCreatedAt"
-      style="margin-bottom: 20px; margin-left: 20px;"
-    >
-      订单时间超过 3 天
-    </el-checkbox>
-
     <el-table :data="filteredData" style="width: 100%" v-loading="loading" fit>
       <el-table-column prop="id" label="订单ID" width="100" />
       <el-table-column prop="pickupPoint" label="取件地点"/>
@@ -69,7 +61,6 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 const loading = ref(true)
 const tableData = ref([])
 const filterStatus = ref('') // 筛选状态
-const filterCreatedAt = ref(false) // 创建时间筛选
 
 // 获取订单数据
 const fetchOrders = async () => {
@@ -128,15 +119,6 @@ const handleDelete = (row) => {
     });
 }
 
-// 计算创建时间是否 >= 3 天
-const isCreatedAtMoreThan3Days = (dateString) => {
-  const createdAt = new Date(dateString)
-  const now = new Date()
-  const diffTime = now - createdAt
-  const diffDays = diffTime / (1000 * 60 * 60 * 24)
-  return diffDays >= 3
-}
-
 // 筛选后的数据
 const filteredData = computed(() => {
   let data = tableData.value
@@ -144,11 +126,6 @@ const filteredData = computed(() => {
   // 状态筛选
   if (filterStatus.value) {
     data = data.filter(item => item.status === filterStatus.value)
-  }
-
-  // 创建时间筛选
-  if (filterCreatedAt.value) {
-    data = data.filter(item => isCreatedAtMoreThan3Days(item.createdAt))
   }
 
   return data
