@@ -40,9 +40,16 @@ export const deleteRotation = async (id) => {
 };
 
 // 添加轮播图
-export const addRotation = async (theme, rotationUrl) => {
+export const addRotation = async (theme, file) => {
   try {
-    const response = await request.post(`/rotation/add?theme=${theme}&rotationUrl=${rotationUrl}`);
+    const formData = new FormData();
+    formData.append('theme', theme);
+    formData.append('file', file);
+    const response = await request.post('/rotation/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return {
       code: 0,
       message: '添加轮播图成功',

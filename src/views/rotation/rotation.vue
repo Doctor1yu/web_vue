@@ -42,8 +42,21 @@
         <el-form-item label="主题">
           <el-input v-model="addForm.theme" placeholder="请输入主题" />
         </el-form-item>
-        <el-form-item label="URL">
-          <el-input v-model="addForm.rotationUrl" placeholder="请输入轮播图URL" />
+        <el-form-item label="图片">
+          <el-upload
+            class="upload-demo"
+            action="#"
+            :auto-upload="false"
+            :on-change="handleFileChange"
+            :limit="1"
+          >
+            <el-button type="primary">选择文件</el-button>
+            <template #tip>
+              <div class="el-upload__tip">
+                只能上传jpg/png文件，且不超过2MB
+              </div>
+            </template>
+          </el-upload>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -65,7 +78,7 @@ const searchTheme = ref('') // 主题搜索
 const addDialogVisible = ref(false) // 控制弹窗显示
 const addForm = ref({
   theme: '',
-  rotationUrl: ''
+  file: null
 })
 
 // 获取轮播图数据
@@ -111,21 +124,26 @@ const handleDelete = (row) => {
     })
 }
 
+// 文件变更处理
+const handleFileChange = (file) => {
+  addForm.value.file = file.raw
+}
+
 // 提交添加轮播图
 const submitAddRotation = async () => {
-  const { theme, rotationUrl } = addForm.value
-  if (!theme || !rotationUrl) {
-    ElMessage.warning('请填写主题和URL')
+  const { theme, file } = addForm.value
+  if (!theme || !file) {
+    ElMessage.warning('请填写主题并选择文件')
     return
   }
 
   try {
-    const res = await addRotation(theme, rotationUrl)
+    const res = await addRotation(theme, file)
     if (res.code === 0) {
       ElMessage.success('添加轮播图成功')
       addDialogVisible.value = false // 关闭弹窗
       fetchRotations() // 重新获取数据
-      addForm.value = { theme: '', rotationUrl: '' } // 重置表单
+      addForm.value = { theme: '', file: null } // 重置表单
     } else {
       ElMessage.error(res.message || '添加轮播图失败')
     }
