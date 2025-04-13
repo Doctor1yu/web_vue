@@ -9,7 +9,7 @@
     >
       <el-option label="未处理" :value="1" />
       <el-option label="处理中" :value="2" />
-      <el-option label="已处理" :value="3" />
+      <el-option label="已完成" :value="3" />
     </el-select>
 
     <el-table :data="filteredData" style="width: 100%" v-loading="loading" fit>
@@ -30,13 +30,21 @@
           {{ formatDateTime(row.createdAt) }}
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="150">
+      <el-table-column fixed="right" label="操作" width="200">
         <template #default="{ row }">
           <el-button
             link
             type="primary"
             size="small"
-            @click="handleUpdateStatus(row)"
+            @click="handleProcessFeedback(row)"
+          >
+            处理反馈
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="openProcessDialog(row)"
           >
             修改状态
           </el-button>
@@ -51,6 +59,39 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 处理反馈弹窗 -->
+    <el-dialog v-model="processFeedbackDialogVisible" title="处理反馈" width="30%">
+      <el-form :model="processFeedbackForm" label-width="80px">
+        <el-form-item label="处理内容">
+          <el-input
+            v-model="processFeedbackForm.content"
+            type="textarea"
+            placeholder="请输入处理内容"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="processFeedbackDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitProcessFeedback">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 修改状态弹窗 -->
+    <el-dialog v-model="processDialogVisible" title="修改状态" width="30%">
+      <el-form :model="processForm" label-width="80px">
+        <el-form-item label="状态">
+          <el-select v-model="processForm.status" placeholder="请选择状态">
+            <el-option label="处理中" value="2" />
+            <el-option label="已完成" value="3" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="processDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitProcess">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -59,9 +100,20 @@ import { ref, onMounted, computed } from 'vue'
 import { getFeedbacks, deleteFeedback, updateFeedbackStatus } from '@/api/feedback'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { formatDateTime } from '@/utils/format'
+
 const loading = ref(true)
 const tableData = ref([])
 const filterStatus = ref('') // 筛选状态
+const processDialogVisible = ref(false) // 控制修改状态弹窗显示
+const processForm = ref({
+  status: ''
+})
+const processFeedbackDialogVisible = ref(false) // 控制处理反馈弹窗显示
+const processFeedbackForm = ref({
+  content: '' // 处理内容
+})
+const currentRow = ref(null) // 当前处理的反馈
+const currentFeedbackRow = ref(null) // 当前处理的反馈
 
 // 获取反馈数据
 const fetchFeedbacks = async () => {
@@ -93,38 +145,73 @@ const statusText = (status) => {
   switch (status) {
     case 1: return '未处理'
     case 2: return '处理中'
-    case 3: return '已处理'
+    case 3: return '已完成'
     default: return '未知'
   }
 }
 
-// 修改状态
-const handleUpdateStatus = (row) => {
-  ElMessageBox.prompt('请输入状态 (1:未处理, 2:处理中, 3:已处理)', '修改状态', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputPattern: /^[1-3]$/,
-    inputErrorMessage: '请输入 1（未处理）、2（处理中）或 3（已处理）'
-  })
-    .then(async ({ value }) => {
-      const newStatus = Number(value)
-      try {
-        const res = await updateFeedbackStatus(row.id, newStatus)
-        if (res.code === 0) {
-          ElMessage.success('状态修改成功')
-          // 更新表格中的状态
-          row.status = newStatus
-        } else {
-          ElMessage.error(res.message || '状态修改失败')
-        }
-      } catch (error) {
-        console.error('状态修改失败:', error)
-        ElMessage.error('状态修改失败')
-      }
-    })
-    .catch(() => {
-      ElMessage.info('修改状态已取消')
-    })
+// 打开处理反馈弹窗
+const handleProcessFeedback = (row) => {
+  currentFeedbackRow.value = row;
+  processFeedbackForm.value = {
+    content: '' // 清空处理内容
+  };
+  processFeedbackDialogVisible.value = true;
+}
+
+// 提交处理反馈
+const submitProcessFeedback = async () => {
+  const { content } = processFeedbackForm.value;
+  if (!content) {
+    ElMessage.warning('请输入处理内容');
+    return;
+  }
+
+  try {
+    // 这里可以调用 API 提交处理内容
+    // 例如：await processFeedback(currentFeedbackRow.value.id, content);
+    ElMessage.success('处理反馈成功');
+    processFeedbackDialogVisible.value = false;
+  } catch (error) {
+    console.error('处理反馈失败:', error);
+    ElMessage.error('处理反馈失败');
+  }
+}
+
+// 打开修改状态弹窗
+const openProcessDialog = (row) => {
+  currentRow.value = row;
+  processForm.value = {
+    status: '', // 默认不选择任何状态
+    remark: row.remark || ''
+  };
+  processDialogVisible.value = true;
+}
+
+// 提交修改状态
+const submitProcess = async () => {
+  const { status } = processForm.value;
+  if (!status) {
+    ElMessage.warning('请选择状态');
+    return;
+  }
+
+  try {
+    const res = await updateFeedbackStatus(currentRow.value.id, status);
+    if (res.code === 0) {
+      ElMessage.success('状态修改成功');
+      currentRow.value.status = status;
+      processDialogVisible.value = false;
+
+      // 提交成功后刷新界面
+      fetchFeedbacks();
+    } else {
+      ElMessage.error(res.message || '状态修改失败');
+    }
+  } catch (error) {
+    console.error('状态修改失败:', error);
+    ElMessage.error('状态修改失败');
+  }
 }
 
 // 删除操作
