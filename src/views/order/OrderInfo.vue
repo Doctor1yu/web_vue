@@ -32,7 +32,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="createdAt" label="创建时间" width="150">
+      <el-table-column prop="createdAt" label="创建时间" width="160">
         <template #default="{ row }">
           {{ formatDateTime(row.createdAt) }}
         </template>
@@ -57,6 +57,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { ordersInfoService, deleteOrderService } from '@/api/order'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import { formatDateTime } from '@/utils/format'
 
 const loading = ref(true)
 const tableData = ref([])
@@ -130,17 +131,6 @@ const filteredData = computed(() => {
 
   return data
 })
-
-// 格式化时间
-const formatDateTime = (dateString) => {
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}`
-}
 
 onMounted(() => {
   fetchOrders()

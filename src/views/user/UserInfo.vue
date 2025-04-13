@@ -85,6 +85,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { getUsers, resetUserPassword, restrictUserLogin } from '@/api/user'
 import { ElMessageBox, ElMessage } from 'element-plus' // 导入 Element Plus 组件
+import { formatDateTime } from '@/utils/format'
 
 const loading = ref(true)
 const tableData = ref([])
@@ -214,17 +215,6 @@ const filteredData = computed(() => {
     return true
   })
 })
-
-// 格式化时间
-const formatDateTime = (dateString) => {
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}`
-}
 
 onMounted(() => {
   fetchUsers()

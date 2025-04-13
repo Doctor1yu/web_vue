@@ -35,6 +35,17 @@
       </el-table-column>
       <el-table-column prop="reviewerName" label="审核人姓名" />
       <el-table-column prop="remark" label="审核备注" />
+      <el-table-column label="收款码" width="150">
+        <template #default="{ row }">
+          <el-image
+            v-if="row.collectUrl"
+            :src="row.collectUrl"
+            style="width: 100px; height: 100px;"
+            fit="cover"
+          />
+          <span v-else>无收款码</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="appliedAt" label="申请时间" width="180">
         <template #default="{ row }">
           {{ formatDateTime(row.appliedAt) }}
@@ -52,6 +63,7 @@
             type="primary"
             size="small"
             @click="openProcessDialog(row)"
+            :disabled="row.status !== '1'"
           >
             处理申请
           </el-button>
@@ -85,6 +97,7 @@ import { ref, onMounted, computed } from 'vue'
 import { getApplications, updateApplicationStatus } from '@/api/applications'
 import { useTokenStore } from '@/stores/token' // 导入 token.js 的 store
 import { ElMessage } from 'element-plus'
+import { formatDateTime } from '@/utils/format'
 
 const loading = ref(true)
 const tableData = ref([])
@@ -204,18 +217,6 @@ const filteredData = computed(() => {
     return true
   })
 })
-
-// 格式化时间
-const formatDateTime = (dateString) => {
-  if (!dateString) return '未审核'
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}`
-}
 
 onMounted(() => {
   fetchApplications()
