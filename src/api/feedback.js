@@ -20,25 +20,6 @@ export const getFeedbacks = async () => {
   }
 };
 
-// 修改反馈状态
-export const updateFeedbackStatus = async (id, status) => {
-  try {
-    const response = await request.put(`/feedback/update?id=${id}&status=${status}`);
-    return {
-      code: 0,
-      message: '修改反馈状态成功',
-      data: response.data
-    };
-  } catch (error) {
-    console.error('修改反馈状态失败:', error);
-    return {
-      code: -1,
-      message: '修改反馈状态失败',
-      data: null
-    };
-  }
-};
-
 // 删除反馈
 export const deleteFeedback = async (id) => {
   try {
@@ -53,6 +34,25 @@ export const deleteFeedback = async (id) => {
     return {
       code: -1,
       message: '删除反馈失败',
+      data: null
+    };
+  }
+};
+
+// 处理反馈
+export const processFeedback = async (id, answer, answerName) => {
+  try {
+    const response = await request.patch(`/feedback/updateAnswer?id=${id}&answer=${answer}&answerName=${answerName}`);
+    return {
+      code: 0,
+      message: '处理反馈成功',
+      data: response.data
+    };
+  } catch (error) {
+    console.error('处理反馈失败:', error);
+    return {
+      code: -1,
+      message: '处理反馈失败',
       data: null
     };
   }
