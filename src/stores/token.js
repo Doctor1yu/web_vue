@@ -7,7 +7,7 @@ export const useTokenStore = defineStore('token', () => {
     const token = ref('')
     const adminInfo = ref({
         username: '',
-        avatarUrl: 'http://stm89m2wy.hd-bkt.clouddn.com/back/avatarUrl/avatar0.jpg'
+        avatarUrl: 'http://image.starhub666.cn/back/image/avatar0.png'
     })
 
     //2.定义一个函数,修改token的值

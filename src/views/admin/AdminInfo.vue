@@ -1,3 +1,117 @@
+<script setup>
+import { ref, onMounted, reactive } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { addAdminService, deleteAdminService, getAdmins } from '@/api/admin'
+import { formatDateTime } from '@/utils/format' // 导入封装的格式化函数
+
+const loading = ref(true)
+const tableData = ref([])
+const addDialogVisible = ref(false) // 控制弹窗显示
+const addFormRef = ref(null) // 表单引用
+
+// 添加管理员表单数据
+const addForm = reactive({
+  username: '',
+  password: ''
+})
+
+// 添加管理员表单验证规则
+const addFormRules = reactive({
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码长度至少6位', trigger: 'blur' }
+  ]
+})
+
+// 获取管理员数据
+const fetchAdmins = async () => {
+  try {
+    const res = await getAdmins()
+    if (res.code === 0) {
+      tableData.value = res.data
+    } else {
+      ElMessage.error(res.message || '获取管理员数据失败')
+    }
+  } catch (error) {
+    console.error('获取管理员数据失败:', error)
+    ElMessage.error('获取管理员数据失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// 打开添加管理员弹窗
+const handleAddAdmin = () => {
+  addDialogVisible.value = true
+}
+
+// 提交添加管理员表单
+const submitAddAdmin = async () => {
+  try {
+    // 验证表单
+    await addFormRef.value.validate()
+    // 调用添加管理员 API
+    const res = await addAdminService({
+      username: addForm.username,
+      password: addForm.password
+    })
+    if (res.code === 0) {
+      ElMessage.success('添加管理员成功')
+      addDialogVisible.value = false // 关闭弹窗
+      fetchAdmins() // 重新获取管理员数据
+      addFormRef.value.resetFields() // 重置表单
+    } else {
+      // 处理用户名已存在的情况
+      if (res.code == 1) { // 使用 == 避免类型问题
+        ElMessage.error(res.message) // 显示 "用户名已存在"
+      } else {
+        ElMessage.error(res.message || '添加管理员失败')
+      }
+    }
+  } catch (error) {
+    console.error('添加管理员失败:', error) // 打印整个 error 对象
+    if (error.response && error.response.data) {
+      ElMessage.error(error.response.data.message || '添加管理员失败') // 显示后端返回的错误信息
+    } else {
+      ElMessage.error(error.message || '添加管理员失败')
+    }
+  }
+}
+
+// 删除管理员
+const handleDelete = (row) => {
+  ElMessageBox.confirm('确定删除该管理员吗？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(async () => {
+      try {
+        const res = await deleteAdminService(row.id) // 调用删除管理员的 API
+        if (res.code === 0) {
+          ElMessage.success('删除管理员成功')
+          fetchAdmins() // 删除成功后重新获取数据
+        } else {
+          ElMessage.error(res.message || '删除管理员失败')
+        }
+      } catch (error) {
+        console.error('删除管理员失败:', error)
+        ElMessage.error('删除管理员失败')
+      }
+    })
+    .catch(() => {
+      ElMessage.info('删除已取消')
+    })
+}
+
+onMounted(() => {
+  fetchAdmins()
+})
+</script>
+
 <template>
   <div style="width: 100%;">
     <!-- 操作按钮 -->
@@ -55,121 +169,7 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, reactive } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { addAdminService, deleteAdminService, getAdmins } from '@/api/admin'
 
-const loading = ref(true)
-const tableData = ref([])
-const addDialogVisible = ref(false) // 控制弹窗显示
-const addFormRef = ref(null) // 表单引用
-
-// 添加管理员表单数据
-const addForm = reactive({
-  username: '',
-  password: ''
-})
-
-// 添加管理员表单验证规则
-const addFormRules = reactive({
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少6位', trigger: 'blur' }
-  ]
-})
-
-// 获取管理员数据
-const fetchAdmins = async () => {
-  try {
-    const res = await getAdmins()
-    if (res.code === 0) {
-      tableData.value = res.data
-    } else {
-      ElMessage.error(res.message || '获取管理员数据失败')
-    }
-  } catch (error) {
-    console.error('获取管理员数据失败:', error)
-    ElMessage.error('获取管理员数据失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-// 格式化时间
-const formatDateTime = (dateString) => {
-  if (!dateString) return '未知时间'
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}`
-}
-
-// 打开添加管理员弹窗
-const handleAddAdmin = () => {
-  addDialogVisible.value = true
-}
-
-// 提交添加管理员表单
-const submitAddAdmin = async () => {
-  try {
-    // 验证表单
-    await addFormRef.value.validate()
-    // 调用添加管理员 API
-    const res = await addAdminService({
-      username: addForm.username,
-      password: addForm.password
-    })
-    if (res.code === 0) {
-      ElMessage.success('添加管理员成功')
-      addDialogVisible.value = false // 关闭弹窗
-      fetchAdmins() // 重新获取管理员数据
-      addFormRef.value.resetFields() // 重置表单
-    } else {
-      ElMessage.error(res.message || '添加管理员失败')
-    }
-  } catch (error) {
-    console.error('添加管理员失败:', error)
-    ElMessage.error('添加管理员失败')
-  }
-}
-
-// 删除管理员
-const handleDelete = (row) => {
-  ElMessageBox.confirm('确定删除该管理员吗？', '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(async () => {
-      try {
-        const res = await deleteAdminService(row.id) // 调用删除管理员的 API
-        if (res.code === 0) {
-          ElMessage.success('删除管理员成功')
-          fetchAdmins() // 删除成功后重新获取数据
-        } else {
-          ElMessage.error(res.message || '删除管理员失败')
-        }
-      } catch (error) {
-        console.error('删除管理员失败:', error)
-        ElMessage.error('删除管理员失败')
-      }
-    })
-    .catch(() => {
-      ElMessage.info('删除已取消')
-    })
-}
-
-onMounted(() => {
-  fetchAdmins()
-})
-</script>
 
 <style lang="scss" scoped>
 .el-table {

@@ -8,7 +8,6 @@
         <el-form 
           :model="loginForm" 
           ref="loginFormRef"
-          :rules="rules"
           @submit.prevent="handleLogin"
         >
           <el-form-item prop="username">
@@ -61,17 +60,6 @@ const loginForm = ref({
   password: ''
 })
 
-const rules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度应在 3 到 20 个字符之间', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少为 6 个字符', trigger: 'blur' }
-  ]
-}
-
 const handleLogin = async () => {
   if (!loginFormRef.value) return
   
@@ -115,7 +103,7 @@ const handleLogin = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url('http://stm89m2wy.hd-bkt.clouddn.com/back/image/green.jpg') no-repeat center center;
+  background: url('http://image.starhub666.cn/back/image/green.jpg') no-repeat center center;
   background-size: cover;
 }
 

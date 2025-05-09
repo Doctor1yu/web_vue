@@ -16,6 +16,7 @@
         clearable
         style="width: 200px;"
       >
+        <el-option label="已申请" value="1" />
         <el-option label="通过" value="3" />
         <el-option label="拒绝" value="4" />
       </el-select>

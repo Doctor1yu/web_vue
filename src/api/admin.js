@@ -52,18 +52,10 @@ export const getAdmins = async () => {
 export const addAdminService = async (data) => {
   try {
     const response = await request.post('/admin/add', data);
-    return {
-      code: 0,
-      message: '添加管理员成功',
-      data: response.data
-    };
+    return response.data;
   } catch (error) {
     console.error('添加管理员失败:', error);
-    return {
-      code: -1,
-      message: '添加管理员失败',
-      data: null
-    };
+    throw error;
   }
 };
 
